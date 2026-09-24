@@ -1,32 +1,73 @@
-# React + TypeScript + Vite
+# Innoscripta News Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A news aggregator built with **Vite + React + TypeScript**, pulling articles from [NewsAPI](https://newsapi.org/), [The Guardian](https://open-platform.theguardian.com/), and the [New York Times](https://developer.nytimes.com/) APIs. Features keyword search, category/source/date filters, and per-user source & category preferences persisted in `localStorage`.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 19** + **TypeScript 6** (strict)
+- **Vite 8** with `@tailwindcss/vite` (Tailwind CSS v4)
+- **TanStack Query v5** for server-state management
+- **React Router v7** for client-side routing
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Clone and install
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+git clone <repo-url>
+cd innoscripta-news-aggregator
+npm install
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### 2. Configure API keys
+
+Copy the example environment file and fill in your keys:
+
+```bash
+cp .env.example .env.local
+```
+
+Open `.env.example` and replace the placeholder values:
+
+```env
+VITE_NEWSAPI_KEY=your_newsapi_key_here
+VITE_GUARDIAN_KEY=your_guardian_key_here
+VITE_NYT_KEY=your_nyt_key_here
+```
+
+> ⚠️ **Never commit `.env.local` or any file containing real API keys.**  
+> The `.gitignore` already excludes all `.env.*` files except `.env.example`.
+
+Where to get keys:
+- **NewsAPI**: https://newsapi.org/register
+- **The Guardian**: https://open-platform.theguardian.com/access/
+- **New York Times**: https://developer.nytimes.com/get-started
+
+### 3. Start the dev server
+
+```bash
+npm run dev
+```
+
+The app will be available at [http://localhost:3000](http://localhost:3000).
+
+## Project Structure
+
+```
+src/
+  types/           # TypeScript interfaces and union types
+  services/        # API adapters (NewsAPI, Guardian, NYT) + aggregator
+  hooks/           # useArticles (React Query) + usePreferences (localStorage)
+  features/        # Feature-scoped components (search, feed, preferences)
+  pages/           # Route-level page components
+  components/      # Shared UI components (LoadingState, EmptyState, ErrorBanner)
+  lib/             # Utilities (localStorage wrapper)
+```
+
+## Features
+
+- 🔍 **Keyword search** with 500ms debounce
+- 🗂 **Filter** by category, source, and date range
+- 🌐 **Multi-source aggregation** with graceful source error handling
+- ⚙️ **Preferences page** to choose preferred sources and categories (persisted to `localStorage`)
+- 🌙 **Dark mode** via Tailwind CSS `dark:` variants
