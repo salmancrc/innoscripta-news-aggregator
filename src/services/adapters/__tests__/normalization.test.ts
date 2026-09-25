@@ -8,6 +8,8 @@ const SEARCH_PARAMS: SearchParams = {
   source: null,
   fromDate: null,
   toDate: null,
+  preferredCategories: [],
+  preferredAuthors: [],
 };
 
 const makeGuardianResponse = (overrides?: object) => ({
