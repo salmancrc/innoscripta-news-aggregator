@@ -1,1 +1,78 @@
 @import "tailwindcss";
+@import "antd/dist/reset.css";
+
+:root {
+  --project-primary: #60a5fa;
+  --project-primary-hover: #3b82f6;
+  --project-border: #475569;
+  --project-bg: #0f172a;
+  --project-panel: #111827;
+  --project-text: #e2e8f0;
+}
+
+.project-range-picker .ant-picker {
+  border-radius: 10px;
+  border-color: var(--project-border);
+  background: var(--project-bg);
+  color: var(--project-text);
+  min-height: 42px;
+}
+
+.project-range-picker .ant-picker:hover,
+.project-range-picker .ant-picker-focused,
+.project-range-picker .ant-picker:focus-within,
+.project-range-picker .ant-picker.ant-picker-focused {
+  border-color: var(--project-primary);
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.25);
+}
+
+.project-range-picker .ant-picker-input > input,
+.project-range-picker .ant-picker-suffix,
+.project-range-picker .ant-picker-separator,
+.project-range-picker .ant-picker-range-separator {
+  color: var(--project-text);
+}
+
+.project-range-picker .ant-picker-panel,
+.project-range-picker .ant-picker-dropdown {
+  background: var(--project-panel);
+  border-color: var(--project-border);
+  color: var(--project-text);
+}
+
+.project-range-picker .ant-picker-cell,
+.project-range-picker .ant-picker-header,
+.project-range-picker .ant-picker-body,
+.project-range-picker .ant-picker-content th,
+.project-range-picker .ant-picker-content td {
+  color: var(--project-text);
+}
+
+.project-range-picker .ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner,
+.project-range-picker .ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner,
+.project-range-picker .ant-picker-cell-in-view.ant-picker-cell-range-start .ant-picker-cell-inner,
+.project-range-picker .ant-picker-cell-in-view.ant-picker-cell-range-end .ant-picker-cell-inner {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  color: #f8fafc;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.project-range-picker .ant-picker-cell-in-view.ant-picker-cell-in-range::before {
+  background: rgba(96, 165, 250, 0.22);
+}
+
+.project-range-picker .ant-picker-cell-in-view.ant-picker-cell-range-hover .ant-picker-cell-inner,
+.project-range-picker .ant-picker-cell-in-view.ant-picker-cell-range-hover-start .ant-picker-cell-inner,
+.project-range-picker .ant-picker-cell-in-view.ant-picker-cell-range-hover-end .ant-picker-cell-inner {
+  background: rgba(96, 165, 250, 0.3);
+  color: #f8fafc;
+}
+
+.project-range-picker .ant-picker-header-view,
+.project-range-picker .ant-picker-header button,
+.project-range-picker .ant-picker-next-icon,
+.project-range-picker .ant-picker-prev-icon,
+.project-range-picker .ant-picker-super-prev-icon,
+.project-range-picker .ant-picker-super-next-icon {
+  color: var(--project-text);
+}

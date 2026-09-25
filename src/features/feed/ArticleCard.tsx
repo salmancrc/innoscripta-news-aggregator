@@ -13,6 +13,7 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    timeZone: 'UTC',
   }).format(new Date(article.publishedAt));
 
   const hasImage = Boolean(article.imageUrl) && !imageError;

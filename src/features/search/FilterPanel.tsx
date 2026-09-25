@@ -1,4 +1,10 @@
+import { ConfigProvider, DatePicker, theme } from 'antd';
+import dayjs from 'dayjs';
 import type { Category, NewsSourceId } from '../../types/source';
+
+const { darkAlgorithm } = theme;
+
+const { RangePicker } = DatePicker;
 
 export interface FilterPanelProps {
   selectedCategory: Category | null;
@@ -81,30 +87,59 @@ export const FilterPanel = ({
           </select>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label htmlFor="from-date-filter" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-            From Date
-          </label>
-          <input
-            id="from-date-filter"
-            type="date"
-            value={fromDate || ''}
-            onChange={(e) => onFromDateChange(e.target.value || null)}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-          />
-        </div>
+        <div className="flex flex-col gap-2 sm:col-span-2 lg:col-span-2">
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Published Date</span>
+          <ConfigProvider
+            theme={{
+              algorithm: darkAlgorithm,
+              token: {
+                colorPrimary: '#60a5fa',
+                colorPrimaryBg: '#1d4ed8',
+                colorBorder: '#475569',
+                colorBgContainer: '#0f172a',
+                colorBgElevated: '#111827',
+                colorText: '#e2e8f0',
+                colorTextPlaceholder: '#94a3b8',
+                colorTextHeading: '#f8fafc',
+                colorTextDisabled: '#64748b',
+                colorSplit: '#334155',
+                borderRadius: 10,
+                controlHeight: 42,
+                controlHeightLG: 42,
+              },
+            }}
+          >
+            <RangePicker
+              className="project-range-picker w-full"
+              value={
+                fromDate && toDate
+                  ? [dayjs(fromDate), dayjs(toDate)]
+                  : fromDate
+                    ? [dayjs(fromDate), dayjs(fromDate)]
+                    : toDate
+                      ? [dayjs(toDate), dayjs(toDate)]
+                      : undefined
+              }
+              format="YYYY/MM/DD"
+              onChange={(dates) => {
+                const [start, end] = dates ?? [null, null];
 
-        <div className="flex flex-col gap-2">
-          <label htmlFor="to-date-filter" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-            To Date
-          </label>
-          <input
-            id="to-date-filter"
-            type="date"
-            value={toDate || ''}
-            onChange={(e) => onToDateChange(e.target.value || null)}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-          />
+                if (!start && !end) {
+                  onFromDateChange(null);
+                  onToDateChange(null);
+                  return;
+                }
+
+                onFromDateChange(start ? start.format('YYYY-MM-DD') : null);
+                onToDateChange(end ? end.format('YYYY-MM-DD') : null);
+              }}
+              style={{
+                borderRadius: 10,
+                boxShadow: 'none',
+                background: '#ffffff',
+              }}
+            />
+          </ConfigProvider>
         </div>
       </div>
 

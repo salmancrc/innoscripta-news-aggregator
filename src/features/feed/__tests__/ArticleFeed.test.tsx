@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ArticleFeed from '../ArticleFeed';
+import { ArticleCard } from '../ArticleCard';
 import type { Article } from '../../../types/article';
 
 // Isolate ArticleFeed from child component implementations
@@ -57,5 +58,17 @@ describe('ArticleFeed', () => {
     render(<ArticleFeed articles={articles} isLoading={false} />);
     expect(screen.getByText('Article x')).toBeInTheDocument();
     expect(screen.getByText('Article y')).toBeInTheDocument();
+  });
+
+  it('keeps the NYT publication day in UTC instead of the browser local timezone', () => {
+    const article: Article = {
+      ...makeArticle('utc-date'),
+      title: 'UTC date article',
+      publishedAt: '2026-09-17T23:34:59Z',
+    };
+
+    render(<ArticleCard article={article} />);
+
+    expect(screen.getByText('Sep 17, 2026')).toBeInTheDocument();
   });
 });
