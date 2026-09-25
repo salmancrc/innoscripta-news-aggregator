@@ -3,7 +3,7 @@ import { guardianAdapter } from './adapters/guardianAdapter';
 import { nytAdapter } from './adapters/nytAdapter';
 
 import type { Article } from '../types/article';
-import type { SearchParams, NewsSourceId } from '../types/source';
+import type { SearchParams, NewsSourceId, Category } from '../types/source';
 import type { NewsSource } from './newsSource';
 
 const activeAdapters: Record<NewsSourceId, NewsSource> = {
@@ -14,10 +14,13 @@ const activeAdapters: Record<NewsSourceId, NewsSource> = {
 
 export async function fetchArticles(
   params: SearchParams,
-  preferredSources: NewsSourceId[]
+  preferredSources: NewsSourceId[],
 ): Promise<{ articles: Article[]; errors: Record<string, string> }> {
-  const sourcesToUse: NewsSourceId[] =
-    preferredSources.length > 0 ? preferredSources : ['newsapi', 'guardian', 'nyt'];
+  const sourcesToUse: NewsSourceId[] = params.source
+    ? [params.source]
+    : preferredSources.length > 0
+      ? preferredSources
+      : ['newsapi', 'guardian', 'nyt'];
 
   const promises = sourcesToUse.map((sourceId) => activeAdapters[sourceId].search(params));
   
@@ -42,11 +45,37 @@ export async function fetchArticles(
     }
   }
 
-  const deduplicatedArticles = Array.from(uniqueArticlesMap.values());
+const deduplicatedArticles = Array.from(uniqueArticlesMap.values());
 
-  deduplicatedArticles.sort((a, b) => {
+  let filteredArticles = deduplicatedArticles.filter((article) => {
+    const publishedDate = article.publishedAt.slice(0, 10);
+    const fromDate = params.fromDate?.slice(0, 10);
+    const toDate = params.toDate?.slice(0, 10);
+
+    if (params.category && article.category !== params.category) return false;
+    if (fromDate && publishedDate < fromDate) return false;
+    if (toDate && publishedDate > toDate) return false;
+    return true;
+  });
+
+  if (!params.category && params.preferredCategories.length > 0) {
+    filteredArticles = filteredArticles.filter((article) =>
+      article.category && params.preferredCategories.includes(article.category as Category)
+    );
+  }
+
+  // Apply preferred authors filter client-side if user has preferred authors
+  if (params.preferredAuthors.length > 0) {
+    filteredArticles = filteredArticles.filter((article) =>
+      article.author && params.preferredAuthors.some((preferredAuthor) =>
+        article.author!.toLowerCase().includes(preferredAuthor.toLowerCase())
+      )
+    );
+  }
+
+  filteredArticles.sort((a, b) => {
     return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
   });
 
-  return { articles: deduplicatedArticles, errors };
+  return { articles: filteredArticles, errors };
 }

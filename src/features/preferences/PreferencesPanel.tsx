@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { UserPreferences, NewsSourceId, Category } from '../../types/source';
 
 export interface PreferencesPanelProps {
@@ -27,6 +28,8 @@ export const PreferencesPanel = ({
   onUpdate,
   onReset,
 }: PreferencesPanelProps) => {
+  const [authorInput, setAuthorInput] = useState<string>('');
+
   const handleSourceChange = (id: NewsSourceId, checked: boolean) => {
     const updatedSources = checked
       ? [...preferences.sources, id]
@@ -39,6 +42,19 @@ export const PreferencesPanel = ({
       ? [...preferences.categories, id]
       : preferences.categories.filter((c) => c !== id);
     onUpdate({ categories: updatedCategories });
+  };
+
+  const handleAddAuthor = (e: React.FormEvent) => {
+    e.preventDefault();
+    const author = authorInput.trim();
+    if (author && !preferences.authors.includes(author)) {
+      onUpdate({ authors: [...preferences.authors, author] });
+      setAuthorInput('');
+    }
+  };
+
+  const handleRemoveAuthor = (authorToRemove: string) => {
+    onUpdate({ authors: preferences.authors.filter((a) => a !== authorToRemove) });
   };
 
   return (
@@ -111,6 +127,57 @@ export const PreferencesPanel = ({
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Authors section */}
+      <section aria-labelledby="authors-heading">
+        <h2
+          id="authors-heading"
+          className="mb-4 text-lg font-semibold text-slate-900 dark:text-white"
+        >
+          Preferred Authors
+        </h2>
+        <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
+          Add authors to prioritize their articles. Leave empty to show all authors.
+        </p>
+        <form onSubmit={handleAddAuthor} className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={authorInput}
+            onChange={(e) => setAuthorInput(e.target.value)}
+            placeholder="Enter author name..."
+            className="flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+          />
+          <button
+            type="submit"
+            disabled={!authorInput.trim()}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Add
+          </button>
+        </form>
+        {preferences.authors.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {preferences.authors.map((author) => (
+              <span
+                key={author}
+                className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+              >
+                {author}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveAuthor(author)}
+                  className="rounded-full p-0.5 hover:bg-blue-200 dark:hover:bg-blue-800/30 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label={`Remove ${author}`}
+                >
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
+                  </svg>
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Reset */}

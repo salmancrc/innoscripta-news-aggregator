@@ -15,6 +15,8 @@ export interface SearchParams {
   source: NewsSourceId | null;
   fromDate: string | null;
   toDate: string | null;
+  preferredCategories: Category[];
+  preferredAuthors: string[];
 }
 
 export interface UserPreferences {

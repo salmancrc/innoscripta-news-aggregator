@@ -37,6 +37,8 @@ const HomePage = () => {
     source,
     fromDate,
     toDate,
+    preferredCategories: preferences.categories,
+    preferredAuthors: preferences.authors,
   };
 
   const { articles, sourceErrors, isLoading } = useArticles(
