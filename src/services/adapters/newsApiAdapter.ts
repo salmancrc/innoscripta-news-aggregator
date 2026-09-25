@@ -1,6 +1,7 @@
 import type { Article } from '../../types/article';
 import type { SearchParams } from '../../types/source';
 import type { NewsSource } from '../newsSource';
+import { cleanAuthor } from '../../lib/utils';
 
 interface NewsApiArticle {
   title: string | null;
@@ -29,16 +30,34 @@ const search = async (params: SearchParams): Promise<Article[]> => {
     throw new Error('NewsAPI key is missing');
   }
 
-  const url = new URL('https://newsapi.org/v2/everything');
-  
-  const q = params.keyword ? params.keyword.trim() : '';
-  url.searchParams.append('q', q || 'latest');
-  
-  if (params.fromDate) {
-    url.searchParams.append('from', params.fromDate);
+  if (params.category && (params.fromDate || params.toDate)) {
+    throw new Error(
+      "Category and date filters can't be used together. Try removing one of these filters to broaden your search.",
+    );
   }
-  if (params.toDate) {
-    url.searchParams.append('to', params.toDate);
+
+  const url = new URL(
+    params.category
+      ? 'https://newsapi.org/v2/top-headlines'
+      : 'https://newsapi.org/v2/everything',
+  );
+  
+  const keyword = params.keyword.trim();
+  if (keyword) {
+    url.searchParams.append('q', keyword);
+  } else if (!params.category) {
+    url.searchParams.append('q', 'latest');
+  }
+  
+  if (params.category) {
+    url.searchParams.append('category', params.category);
+  } else {
+    if (params.fromDate) {
+      url.searchParams.append('from', params.fromDate);
+    }
+    if (params.toDate) {
+      url.searchParams.append('to', params.toDate);
+    }
   }
 
   url.searchParams.append('apiKey', apiKey);
@@ -62,8 +81,8 @@ const search = async (params: SearchParams): Promise<Article[]> => {
     imageUrl: article.urlToImage ?? null,
     publishedAt: article.publishedAt,
     source: 'NewsAPI',
-    category: null,
-    author: article.author ?? null,
+    category: params.category,
+    author: cleanAuthor(article.author ?? null, article.url),
   }));
 };
 

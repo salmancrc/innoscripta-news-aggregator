@@ -37,6 +37,8 @@ const SEARCH_PARAMS: SearchParams = {
   source: null,
   fromDate: null,
   toDate: null,
+  preferredCategories: [],
+  preferredAuthors: [],
 };
 
 describe('fetchArticles aggregator', () => {
@@ -114,5 +116,48 @@ describe('fetchArticles aggregator', () => {
     expect(guardianAdapter.search).toHaveBeenCalledOnce();
     expect(newsApiAdapter.search).not.toHaveBeenCalled();
     expect(nytAdapter.search).not.toHaveBeenCalled();
+  });
+
+  it('keeps only articles matching an explicit category and date range', async () => {
+    vi.mocked(newsApiAdapter.search).mockResolvedValue([
+      minimalArticle({ id: 'technology', category: 'technology', publishedAt: '2024-03-15T00:00:00Z' }),
+      minimalArticle({ id: 'business', category: 'business', publishedAt: '2024-03-15T00:00:00Z' }),
+      minimalArticle({ id: 'outside-range', category: 'technology', publishedAt: '2024-02-15T00:00:00Z' }),
+    ]);
+    vi.mocked(guardianAdapter.search).mockResolvedValue([]);
+    vi.mocked(nytAdapter.search).mockResolvedValue([]);
+
+    const result = await fetchArticles(
+      {
+        ...SEARCH_PARAMS,
+        category: 'technology',
+        fromDate: '2024-03-01',
+        toDate: '2024-03-31',
+      },
+      ['newsapi'],
+    );
+
+    expect(result.articles.map((article) => article.id)).toEqual(['technology']);
+  });
+
+  it('applies preferred categories and authors when no explicit category is selected', async () => {
+    vi.mocked(newsApiAdapter.search).mockResolvedValue([
+      minimalArticle({ id: 'preferred', category: 'technology', author: 'Ada Lovelace' }),
+      minimalArticle({ id: 'wrong-category', category: 'business', author: 'Ada Lovelace' }),
+      minimalArticle({ id: 'wrong-author', category: 'technology', author: 'Grace Hopper' }),
+    ]);
+    vi.mocked(guardianAdapter.search).mockResolvedValue([]);
+    vi.mocked(nytAdapter.search).mockResolvedValue([]);
+
+    const result = await fetchArticles(
+      {
+        ...SEARCH_PARAMS,
+        preferredCategories: ['technology'],
+        preferredAuthors: ['ada'],
+      },
+      ['newsapi'],
+    );
+
+    expect(result.articles.map((article) => article.id)).toEqual(['preferred']);
   });
 });

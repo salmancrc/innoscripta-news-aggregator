@@ -1,6 +1,7 @@
 import type { Article } from '../../types/article';
-import type { SearchParams } from '../../types/source';
+import type { Category, SearchParams } from '../../types/source';
 import type { NewsSource } from '../newsSource';
+import { cleanAuthor } from '../../lib/utils';
 
 interface NYTMultimediaItem {
   subtype: string;
@@ -35,6 +36,10 @@ interface NYTResponse {
   status: string;
   response?: {
     docs: NYTArticle[];
+    meta?: {
+      hits?: number;
+      offset?: number;
+    };
   };
   fault?: {
     faultstring: string;
@@ -45,6 +50,33 @@ const formatDate = (dateStr: string): string => {
   return dateStr.split('T')[0].replace(/-/g, '');
 };
 
+const nytSectionsByCategory: Partial<Record<Category, string[]>> = {
+  technology: ['Technology'],
+  science: ['Science'],
+  health: ['Health'],
+  business: ['Business'],
+  sports: ['Sports'],
+  entertainment: ['Arts', 'Movies', 'Theater', 'Books'],
+  general: ['U.S.', 'World', 'Politics'],
+};
+
+const mapNytCategory = (sectionName: string): Category | null => {
+  const section = sectionName.toLowerCase();
+  if (section === 'technology') return 'technology';
+  if (section === 'science') return 'science';
+  if (section === 'health') return 'health';
+  if (section === 'business') return 'business';
+  if (section === 'sports' || section === 'sport') return 'sports';
+  if (['arts', 'movies', 'theater', 'books'].includes(section)) return 'entertainment';
+  if (['u.s.', 'us', 'world', 'politics'].includes(section)) return 'general';
+  return null;
+};
+
+const buildSectionFilter = (sections: string[]): string => {
+  const escapedSections = sections.map((section) => `"${section.replace(/"/g, '\\"')}"`);
+  return `section_name:(${escapedSections.join(' OR ')})`;
+};
+
 const search = async (params: SearchParams): Promise<Article[]> => {
   const apiKey = import.meta.env.VITE_NYT_KEY;
   if (!apiKey) {
@@ -52,8 +84,10 @@ const search = async (params: SearchParams): Promise<Article[]> => {
   }
 
   const url = new URL('https://api.nytimes.com/svc/search/v2/articlesearch.json');
-  
+
   url.searchParams.append('api-key', apiKey);
+  url.searchParams.append('page', '0');
+  url.searchParams.append('sort', 'oldest');
 
   if (params.keyword) {
     url.searchParams.append('q', params.keyword.trim());
@@ -62,19 +96,24 @@ const search = async (params: SearchParams): Promise<Article[]> => {
   if (params.fromDate) {
     url.searchParams.append('begin_date', formatDate(params.fromDate));
   }
-  
+
   if (params.toDate) {
     url.searchParams.append('end_date', formatDate(params.toDate));
   }
-  
+
   if (params.category) {
-    // Note: If using specific Category mappings, NYT has its own sections,
-    // we assume params.category matches NYT's expectations or falls back gracefully.
-    url.searchParams.append('fq', `section_name:("${params.category}")`);
+    const sections = nytSectionsByCategory[params.category];
+    if (sections?.length) {
+      url.searchParams.set('fq', buildSectionFilter(sections));
+    }
   }
 
   const response = await fetch(url.toString());
   const data: NYTResponse = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.fault?.faultstring || 'NYT API request failed');
+  }
 
   if (data.status !== 'OK') {
     throw new Error(data.fault?.faultstring || 'NYT API request failed');
@@ -100,6 +139,7 @@ const search = async (params: SearchParams): Promise<Article[]> => {
     if (author) {
       author = author.replace(/^By\s+/i, '').trim();
     }
+    author = cleanAuthor(author, doc.web_url);
 
     return {
       id: doc._id,
@@ -109,7 +149,7 @@ const search = async (params: SearchParams): Promise<Article[]> => {
       imageUrl,
       publishedAt: doc.pub_date,
       source: 'New York Times',
-      category: doc.section_name?.toLowerCase() ?? null,
+      category: doc.section_name ? mapNytCategory(doc.section_name) : null,
       author,
     };
   });

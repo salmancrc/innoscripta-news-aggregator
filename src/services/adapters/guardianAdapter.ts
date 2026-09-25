@@ -1,6 +1,7 @@
 import type { Article } from '../../types/article';
-import type { SearchParams } from '../../types/source';
+import type { Category, SearchParams } from '../../types/source';
 import type { NewsSource } from '../newsSource';
+import { cleanAuthor } from '../../lib/utils';
 
 interface GuardianArticle {
   id: string;
@@ -20,10 +21,12 @@ interface GuardianResponse {
     status: string;
     results?: GuardianArticle[];
     message?: string;
+    pages?: number;
+    currentPage?: number;
   };
 }
 
-const mapCategory = (sectionName: string): string | null => {
+const mapCategory = (sectionName: string): Category | null => {
   const lower = sectionName.toLowerCase();
   if (lower.includes('tech')) return 'technology';
   if (lower.includes('science')) return 'science';
@@ -39,8 +42,16 @@ const mapCategory = (sectionName: string): string | null => {
   ) {
     return 'entertainment';
   }
-  if (lower.includes('news') || lower.includes('world') || lower.includes('uk') || lower.includes('global')) return 'general';
+  if (lower.includes('news') || lower.includes('world') || lower.includes('uk') || lower.includes('global') || lower.includes('politic')) return 'general';
   return null;
+};
+
+const guardianSectionByCategory: Partial<Record<Category, string>> = {
+  technology: 'technology',
+  science: 'science',
+  business: 'business',
+  sports: 'sport',
+  entertainment: 'culture',
 };
 
 const search = async (params: SearchParams): Promise<Article[]> => {
@@ -50,25 +61,28 @@ const search = async (params: SearchParams): Promise<Article[]> => {
   }
 
   const url = new URL('https://content.guardianapis.com/search');
-  
+
   url.searchParams.append('api-key', apiKey);
   url.searchParams.append('show-fields', 'thumbnail,trailText,byline');
   url.searchParams.append('page-size', '20');
+  url.searchParams.append('page', '1');
+  url.searchParams.append('order-by', 'oldest');
 
   if (params.keyword) {
     url.searchParams.append('q', params.keyword.trim());
   }
-  
+
   if (params.fromDate) {
     url.searchParams.append('from-date', params.fromDate.split('T')[0]);
   }
-  
+
   if (params.toDate) {
     url.searchParams.append('to-date', params.toDate.split('T')[0]);
   }
-  
-  if (params.category) {
-    url.searchParams.append('section', params.category);
+
+  const section = params.category && guardianSectionByCategory[params.category];
+  if (section) {
+    url.searchParams.append('section', section);
   }
 
   const response = await fetch(url.toString());
@@ -91,7 +105,7 @@ const search = async (params: SearchParams): Promise<Article[]> => {
     publishedAt: result.webPublicationDate,
     source: 'The Guardian',
     category: mapCategory(result.sectionName),
-    author: result.fields?.byline ?? null,
+    author: cleanAuthor(result.fields?.byline ?? null, result.webUrl),
   }));
 };
 
