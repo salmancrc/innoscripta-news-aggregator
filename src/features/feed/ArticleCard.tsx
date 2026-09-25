@@ -14,19 +14,33 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
     day: 'numeric',
   }).format(new Date(article.publishedAt));
 
+  const hasImage = Boolean(article.imageUrl) && !imageError;
+
   return (
     <article
       role="article"
       className="flex flex-col bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-slate-100 dark:border-slate-700"
     >
-      {article.imageUrl && !imageError && (
+      {hasImage ? (
         <img
-          src={article.imageUrl}
+          src={article.imageUrl!}
           alt={article.title}
           loading="lazy"
           onError={() => setImageError(true)}
           className="w-full h-48 sm:h-56 object-cover"
         />
+      ) : (
+        <div
+          role="img"
+          aria-label="No article image available"
+          className="flex h-48 items-center justify-center bg-gradient-to-br from-blue-950 via-slate-800 to-slate-900 sm:h-56"
+        >
+          <svg aria-hidden="true" className="h-12 w-12 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <circle cx="8.5" cy="9" r="1.5" />
+            <path d="m3 16 4.5-4 3.5 3 2.5-2 7.5 5" />
+          </svg>
+        </div>
       )}
 
       <div className="flex flex-col flex-1 p-5 gap-3">
