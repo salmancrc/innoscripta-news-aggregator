@@ -71,3 +71,27 @@ src/
 - 🌐 **Multi-source aggregation** with graceful source error handling
 - ⚙️ **Preferences page** to choose preferred sources and categories (persisted to `localStorage`)
 - 🌙 **Dark mode** via Tailwind CSS `dark:` variants
+
+## Docker
+
+API keys are baked into the static bundle at build time via `--build-arg`. No runtime environment injection is needed.
+
+### Build the image
+
+```bash
+docker build \
+  --build-arg VITE_NEWSAPI_KEY=your_newsapi_key_here \
+  --build-arg VITE_GUARDIAN_KEY=your_guardian_key_here \
+  --build-arg VITE_NYT_KEY=your_nyt_key_here \
+  -t briefly .
+```
+
+### Run the container
+
+```bash
+docker run -p 3000:80 briefly
+```
+
+The app will be available at [http://localhost:3000](http://localhost:3000).
+
+> ⚠️ Because Vite embeds `import.meta.env` values at **build time**, the keys become part of the compiled JS bundle. Do not use real production keys in shared or public images.
