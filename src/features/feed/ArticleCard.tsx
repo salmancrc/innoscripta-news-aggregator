@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Article } from '../../types/article';
+import { capitalizeCategory } from '../../lib/utils';
 
 export interface ArticleCardProps {
   article: Article;
@@ -67,6 +68,11 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
           <span className="flex items-center gap-1.5 before:content-[''] before:block before:w-1 before:h-1 before:rounded-full before:bg-slate-300 dark:before:bg-slate-600">
             {article.source}
           </span>
+          {article.category && (
+            <span className="flex items-center gap-1.5 before:content-[''] before:block before:w-1 before:h-1 before:rounded-full before:bg-slate-300 dark:before:bg-slate-600">
+              {capitalizeCategory(article.category)}
+            </span>
+          )}
           {article.author && (
             <span className="flex items-center gap-1.5 before:content-[''] before:block before:w-1 before:h-1 before:rounded-full before:bg-slate-300 dark:before:bg-slate-600 line-clamp-1">
               {article.author}

@@ -17,7 +17,7 @@ const EmptyState = ({ message = 'No articles found' }: EmptyStateProps) => (
     </svg>
     <p className="text-lg font-semibold text-slate-700 dark:text-slate-200">{message}</p>
     <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-      Try checking your filters or using a different keyword.
+      Try broadening your search, adjusting the filters, or choosing another news source.
     </p>
   </div>
 );
