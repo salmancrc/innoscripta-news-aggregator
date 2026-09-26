@@ -61,7 +61,7 @@ const nytSectionsByCategory: Partial<Record<Category, string[]>> = {
 };
 
 const mapNytCategory = (sectionName: string): Category | null => {
-  const section = sectionName.toLowerCase();
+  const section = sectionName.trim().toLowerCase();
   if (section === 'technology') return 'technology';
   if (section === 'science') return 'science';
   if (section === 'health') return 'health';
@@ -87,7 +87,7 @@ const search = async (params: SearchParams): Promise<Article[]> => {
 
   url.searchParams.append('api-key', apiKey);
   url.searchParams.append('page', '0');
-  url.searchParams.append('sort', 'oldest');
+  url.searchParams.append('sort', 'newest');
 
   if (params.keyword) {
     url.searchParams.append('q', params.keyword.trim());

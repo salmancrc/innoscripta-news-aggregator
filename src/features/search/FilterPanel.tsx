@@ -186,7 +186,7 @@ export const FilterPanel = ({
             }}
           >
             <RangePicker
-              className="project-range-picker w-full"
+              className="project-range-picker w-full rounded-[10px] shadow-none min-h-[42px] h-[42px] bg-white dark:bg-slate-700"
               value={
                 fromDate && toDate
                   ? [dayjs(fromDate), dayjs(toDate)]
@@ -207,13 +207,6 @@ export const FilterPanel = ({
                 const [start, end] = dates;
                 onFromDateChange(start ? start.format('YYYY-MM-DD') : null);
                 onToDateChange(end ? end.format('YYYY-MM-DD') : null);
-              }}
-              style={{
-                borderRadius: 10,
-                boxShadow: 'none',
-                minHeight: 42,
-                height: 42,
-                background: isDarkMode ? 'var(--project-panel)' : '#ffffff',
               }}
             />
           </ConfigProvider>

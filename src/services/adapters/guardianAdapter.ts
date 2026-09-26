@@ -27,10 +27,18 @@ interface GuardianResponse {
 }
 
 const mapCategory = (sectionName: string): Category | null => {
-  const lower = sectionName.toLowerCase();
+  const lower = sectionName.trim().toLowerCase();
   if (lower.includes('tech')) return 'technology';
   if (lower.includes('science')) return 'science';
-  if (lower.includes('health') || lower.includes('medical')) return 'health';
+  if (
+    lower.includes('health') ||
+    lower.includes('medical') ||
+    lower.includes('life and style') ||
+    lower.includes('lifeandstyle') ||
+    lower.includes('lifestyle')
+  ) {
+    return 'health';
+  }
   if (lower.includes('business') || lower.includes('money') || lower.includes('economy')) return 'business';
   if (lower.includes('sport')) return 'sports';
   if (
@@ -49,6 +57,7 @@ const mapCategory = (sectionName: string): Category | null => {
 const guardianSectionByCategory: Partial<Record<Category, string>> = {
   technology: 'technology',
   science: 'science',
+  health: 'lifeandstyle',
   business: 'business',
   sports: 'sport',
   entertainment: 'culture',
@@ -66,7 +75,7 @@ const search = async (params: SearchParams): Promise<Article[]> => {
   url.searchParams.append('show-fields', 'thumbnail,trailText,byline');
   url.searchParams.append('page-size', '20');
   url.searchParams.append('page', '1');
-  url.searchParams.append('order-by', 'oldest');
+  url.searchParams.append('order-by', 'newest');
 
   if (params.keyword) {
     url.searchParams.append('q', params.keyword.trim());

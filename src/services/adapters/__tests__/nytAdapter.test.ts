@@ -29,6 +29,7 @@ describe('nytAdapter category filtering', () => {
 
     const requestUrl = String(vi.mocked(fetch).mock.calls[0][0]);
     expect(requestUrl).toContain('api-key=test-key');
+    expect(requestUrl).toContain('sort=newest');
     expect(requestUrl).toContain('fq=section_name%3A%28%22Health%22%29');
   });
 });

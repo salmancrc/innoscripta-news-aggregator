@@ -79,6 +79,15 @@ describe('guardianAdapter normalization', () => {
     expect(articles[0].author).toBeNull();
   });
 
+  it('requests newest Guardian results first', async () => {
+    stubFetch(makeGuardianResponse());
+
+    await guardianAdapter.search(SEARCH_PARAMS);
+
+    const requestUrl = String(vi.mocked(fetch).mock.calls[0][0]);
+    expect(requestUrl).toContain('order-by=newest');
+  });
+
   it('throws when the API returns status !== ok', async () => {
     stubFetch({ response: { status: 'error', message: 'API error' } });
 

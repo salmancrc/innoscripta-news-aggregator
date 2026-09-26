@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useArticles } from "../hooks/useArticles";
 import { usePreferences } from "../hooks/usePreferences";
 import SearchBar from "../features/search/SearchBar";
@@ -6,7 +7,7 @@ import FilterPanel from "../features/search/FilterPanel";
 import ArticleFeed from "../features/feed/ArticleFeed";
 import ErrorBanner from "../components/ErrorBanner";
 import PreferencesDrawer from "../features/preferences/PreferencesDrawer";
-import type { SearchParams } from "../types/source";
+import type { SearchParams, Category, NewsSourceId } from "../types/source";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -23,11 +24,20 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 const HomePage = () => {
-  const [keyword, setKeyword] = useState<string>("");
-  const [category, setCategory] = useState<SearchParams["category"]>(null);
-  const [source, setSource] = useState<SearchParams["source"]>(null);
-  const [fromDate, setFromDate] = useState<string | null>(null);
-  const [toDate, setToDate] = useState<string | null>(null);
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams();
+  const [keyword, setKeyword] = useState<string>(() => urlSearchParams.get("q") ?? "");
+  const [category, setCategory] = useState<SearchParams["category"]>(() => {
+    const value = urlSearchParams.get("category");
+    return value && ["general", "technology", "science", "health", "business", "sports", "entertainment"].includes(value)
+      ? (value as Category)
+      : null;
+  });
+  const [source, setSource] = useState<SearchParams["source"]>(() => {
+    const value = urlSearchParams.get("source");
+    return value === "newsapi" || value === "guardian" || value === "nyt" ? (value as NewsSourceId) : null;
+  });
+  const [fromDate, setFromDate] = useState<string | null>(() => urlSearchParams.get("from") ?? null);
+  const [toDate, setToDate] = useState<string | null>(() => urlSearchParams.get("to") ?? null);
   const [isPreferencesOpen, setIsPreferencesOpen] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     if (typeof document === 'undefined') return false;
@@ -36,6 +46,22 @@ const HomePage = () => {
 
   const debouncedKeyword = useDebounce(keyword, 500);
   const { preferences, updatePreferences, resetPreferences } = usePreferences();
+
+  useEffect(() => {
+    const next = new URLSearchParams();
+
+    if (debouncedKeyword.trim()) next.set('q', debouncedKeyword.trim());
+    if (category) next.set('category', category);
+    if (source) next.set('source', source);
+    if (fromDate) next.set('from', fromDate);
+    if (toDate) next.set('to', toDate);
+
+    const current = urlSearchParams.toString();
+    const nextString = next.toString();
+    if (current !== nextString) {
+      setUrlSearchParams(next, { replace: true });
+    }
+  }, [debouncedKeyword, category, source, fromDate, toDate, urlSearchParams, setUrlSearchParams]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -68,9 +94,11 @@ const HomePage = () => {
     }, 120);
   };
 
-  const searchParams: SearchParams = {
+  const effectiveCategory = category ?? (preferences.categories.length === 1 ? preferences.categories[0] : null);
+
+  const requestParams: SearchParams = {
     keyword: debouncedKeyword,
-    category,
+    category: effectiveCategory,
     source,
     fromDate,
     toDate,
@@ -79,7 +107,7 @@ const HomePage = () => {
   };
 
   const { articles, sourceErrors, isLoading } = useArticles(
-    searchParams,
+    requestParams,
     preferences.sources,
   );
 
