@@ -7,9 +7,9 @@ const LoadingState = () => (
     {Array.from({ length: 6 }, (_, index) => (
       <div
         key={index}
-        className="animate-pulse overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
+        className="animate-pulse overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
       >
-        <div className="h-48 bg-slate-200 sm:h-56 dark:bg-slate-700" />
+        <div className="aspect-video bg-slate-200 dark:bg-slate-700" />
         <div className="space-y-3 p-5">
           <div className="h-5 w-4/5 rounded bg-slate-200 dark:bg-slate-700" />
           <div className="h-4 w-full rounded bg-slate-200 dark:bg-slate-700" />

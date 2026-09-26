@@ -19,69 +19,68 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
   const hasImage = Boolean(article.imageUrl) && !imageError;
 
   return (
-    <article
-      role="article"
-      className="flex flex-col bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-slate-100 dark:border-slate-700"
+    <a
+      href={article.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Read full article: ${article.title}`}
+      className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.06),0_10px_28px_rgba(15,23,42,0.08)] transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_20px_45px_rgba(79,70,229,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_1px_2px_rgba(2,6,23,0.5),0_18px_40px_rgba(15,23,42,0.6)] dark:hover:shadow-[0_22px_48px_rgba(99,102,241,0.18)] dark:focus-visible:ring-offset-slate-900"
     >
-      {hasImage ? (
-        <img
-          src={article.imageUrl!}
-          alt={article.title}
-          loading="lazy"
-          onError={() => setImageError(true)}
-          className="w-full h-48 sm:h-56 object-cover"
-        />
-      ) : (
-        <div
-          role="img"
-          aria-label="No article image available"
-          className="flex h-48 items-center justify-center bg-gradient-to-br from-blue-950 via-slate-800 to-slate-900 sm:h-56"
-        >
-          <svg aria-hidden="true" className="h-12 w-12 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <rect x="3" y="4" width="18" height="16" rx="2" />
-            <circle cx="8.5" cy="9" r="1.5" />
-            <path d="m3 16 4.5-4 3.5 3 2.5-2 7.5 5" />
-          </svg>
-        </div>
-      )}
-
-      <div className="flex flex-col flex-1 p-5 gap-3">
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white leading-tight">
-          <a
-            href={article.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Read full article: ${article.title}`}
-            className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+      <article role="article" className="flex flex-col">
+        {hasImage ? (
+          <div className="overflow-hidden bg-slate-200 transition-transform duration-500 ease-out group-hover:scale-[1.02] dark:bg-slate-700">
+            <img
+              src={article.imageUrl!}
+              alt={article.title}
+              loading="lazy"
+              onError={() => setImageError(true)}
+              className="aspect-video w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+            />
+          </div>
+        ) : (
+          <div
+            role="img"
+            aria-label="No article image available"
+            className="flex aspect-video items-center justify-center bg-gradient-to-br from-slate-200 via-slate-100 to-slate-200 text-slate-500 dark:from-slate-700 dark:via-slate-800 dark:to-slate-900 dark:text-slate-400"
           >
-            {article.title}
-          </a>
-        </h2>
-
-        {article.description && (
-          <p className="text-slate-600 dark:text-slate-300 line-clamp-3 text-sm leading-relaxed">
-            {article.description}
-          </p>
+            <svg aria-hidden="true" className="h-12 w-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <circle cx="8.5" cy="9" r="1.5" />
+              <path d="m3 16 4.5-4 3.5 3 2.5-2 7.5 5" />
+            </svg>
+          </div>
         )}
 
-        <div className="mt-auto pt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-          <time dateTime={article.publishedAt}>{formattedDate}</time>
-          <span className="flex items-center gap-1.5 before:content-[''] before:block before:w-1 before:h-1 before:rounded-full before:bg-slate-300 dark:before:bg-slate-600">
-            {article.source}
-          </span>
-          {article.category && (
-            <span className="flex items-center gap-1.5 before:content-[''] before:block before:w-1 before:h-1 before:rounded-full before:bg-slate-300 dark:before:bg-slate-600">
-              {capitalizeCategory(article.category)}
-            </span>
+        <div className="flex flex-1 flex-col gap-3 p-5">
+          <h2 className="line-clamp-2 text-[1.05rem] font-semibold leading-tight tracking-[-0.02em] text-slate-900 transition-colors group-hover:text-indigo-600 dark:text-slate-100 dark:group-hover:text-indigo-400">
+            {article.title}
+          </h2>
+
+          {article.description && (
+            <p className="line-clamp-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              {article.description}
+            </p>
           )}
-          {article.author && (
-            <span className="flex items-center gap-1.5 before:content-[''] before:block before:w-1 before:h-1 before:rounded-full before:bg-slate-300 dark:before:bg-slate-600 line-clamp-1">
-              {article.author}
+
+          <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-2 pt-4 text-[0.7rem] font-medium tracking-[0.02em] text-slate-500 dark:text-slate-400">
+            <time dateTime={article.publishedAt}>{formattedDate}</time>
+            <span className="flex items-center gap-1.5 before:block before:h-1 before:w-1 before:rounded-full before:bg-slate-300 before:content-[''] dark:before:bg-slate-600">
+              {article.source}
             </span>
-          )}
+            {article.category && (
+              <span className="flex items-center gap-1.5 before:block before:h-1 before:w-1 before:rounded-full before:bg-slate-300 before:content-[''] dark:before:bg-slate-600">
+                {capitalizeCategory(article.category)}
+              </span>
+            )}
+            {article.author && (
+              <span className="line-clamp-1 flex items-center gap-1.5 before:block before:h-1 before:w-1 before:rounded-full before:bg-slate-300 before:content-[''] dark:before:bg-slate-600">
+                {article.author}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </a>
   );
 };
 

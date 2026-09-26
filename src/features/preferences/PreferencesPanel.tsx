@@ -63,7 +63,7 @@ export const PreferencesPanel = ({
       <section aria-labelledby="sources-heading">
         <h2
           id="sources-heading"
-          className="mb-4 text-lg font-semibold text-slate-900 dark:text-white"
+          className="mb-4 text-base font-semibold tracking-[-0.01em] text-slate-900 dark:text-white"
         >
           Preferred Sources
         </h2>
@@ -101,7 +101,7 @@ export const PreferencesPanel = ({
       <section aria-labelledby="categories-heading">
         <h2
           id="categories-heading"
-          className="mb-4 text-lg font-semibold text-slate-900 dark:text-white"
+          className="mb-4 text-base font-semibold tracking-[-0.01em] text-slate-900 dark:text-white"
         >
           Preferred Categories
         </h2>
@@ -133,7 +133,7 @@ export const PreferencesPanel = ({
       <section aria-labelledby="authors-heading">
         <h2
           id="authors-heading"
-          className="mb-4 text-lg font-semibold text-slate-900 dark:text-white"
+          className="mb-4 text-base font-semibold tracking-[-0.01em] text-slate-900 dark:text-white"
         >
           Preferred Authors
         </h2>
@@ -151,7 +151,7 @@ export const PreferencesPanel = ({
           <button
             type="submit"
             disabled={!authorInput.trim()}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cursor-pointer rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:text-white disabled:opacity-50 disabled:cursor-not-allowed dark:bg-indigo-500 dark:text-white dark:hover:bg-indigo-400"
           >
             Add
           </button>
@@ -167,7 +167,7 @@ export const PreferencesPanel = ({
                 <button
                   type="button"
                   onClick={() => handleRemoveAuthor(author)}
-                  className="rounded-full p-0.5 hover:bg-blue-200 dark:hover:bg-blue-800/30 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="cursor-pointer rounded-full p-0.5 text-blue-700 transition-colors hover:bg-blue-200 dark:text-blue-300 dark:hover:bg-blue-800/30 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label={`Remove ${author}`}
                 >
                   <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -185,7 +185,7 @@ export const PreferencesPanel = ({
         <button
           type="button"
           onClick={onReset}
-          className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950/40 dark:focus:ring-offset-slate-900"
+          className="cursor-pointer rounded-xl border border-red-300 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-all duration-200 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:border-red-700 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/30 dark:focus:ring-offset-slate-900"
         >
           Reset to defaults
         </button>
