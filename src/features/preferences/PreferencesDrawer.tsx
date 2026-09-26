@@ -45,7 +45,7 @@ const PreferencesDrawer = ({
           >
             <Dialog.Panel className="flex h-full w-full flex-col border-l border-slate-200 bg-white/95 shadow-[0_20px_60px_rgba(15,23,42,0.18)] backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95 sm:w-96">
               <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/90 px-5 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/90">
-                <Dialog.Title className="flex items-center text-xl font-semibold leading-none tracking-[-0.03em] text-slate-900 dark:text-slate-100">
+                <Dialog.Title className="m-0 flex items-center text-xl font-semibold leading-none tracking-[-0.03em] text-slate-900 dark:text-slate-100">
                   Preferences
                 </Dialog.Title>
 

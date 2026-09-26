@@ -82,11 +82,11 @@ export const PreferencesPanel = ({
                   checked={isChecked}
                   disabled={isLastChecked}
                   onChange={(e) => handleSourceChange(id, e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600"
+                  className="h-4 w-4 cursor-pointer rounded border-slate-300 accent-indigo-500 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:accent-indigo-500"
                 />
                 <label
                   htmlFor={`source-${id}`}
-                  className="text-sm font-medium text-slate-700 dark:text-slate-300 aria-disabled:opacity-50"
+                  className="cursor-pointer text-sm font-medium text-slate-700 dark:text-slate-300 aria-disabled:opacity-50"
                   aria-disabled={isLastChecked}
                 >
                   {label}
@@ -116,11 +116,11 @@ export const PreferencesPanel = ({
                 type="checkbox"
                 checked={preferences.categories.includes(id)}
                 onChange={(e) => handleCategoryChange(id, e.target.checked)}
-                className="h-4 w-4 min-h-4 min-w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600"
+                className="h-4 w-4 min-h-4 min-w-4 cursor-pointer rounded border-slate-300 accent-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:accent-indigo-500"
               />
               <label
                 htmlFor={`category-${id}`}
-                className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                className="cursor-pointer text-sm font-medium text-slate-700 dark:text-slate-300"
               >
                 {label}
               </label>
@@ -151,7 +151,7 @@ export const PreferencesPanel = ({
           <button
             type="submit"
             disabled={!authorInput.trim()}
-            className="cursor-pointer rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+            className="cursor-pointer rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
             style={{ color: '#ffffff' }}
           >
             Add
