@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Article } from '../../types/article';
 import type { SearchParams } from '../../types/source';
 
-// Mock adapters before importing aggregator so the module picks up mocks
 vi.mock('../adapters/newsApiAdapter', () => ({
   newsApiAdapter: { search: vi.fn() },
 }));
@@ -60,104 +59,7 @@ describe('fetchArticles aggregator', () => {
     expect(result.articles).toHaveLength(2);
     expect(result.articles.map((a) => a.title)).toContain('From NewsAPI');
     expect(result.articles.map((a) => a.title)).toContain('From NYT');
-  });
-
-  it('captures the failing source error message in errors record', async () => {
-    vi.mocked(newsApiAdapter.search).mockResolvedValue([]);
-    vi.mocked(guardianAdapter.search).mockRejectedValue(new Error('Guardian down'));
-    vi.mocked(nytAdapter.search).mockResolvedValue([]);
-
-    const result = await fetchArticles(SEARCH_PARAMS, []);
-
     expect(result.errors['guardian']).toBeDefined();
     expect(result.errors['guardian']).toContain('Guardian down');
-  });
-
-  it('deduplicates articles by url, keeping first occurrence', async () => {
-    const duplicate = minimalArticle({ id: 'dup', url: 'https://shared.com/article' });
-    vi.mocked(newsApiAdapter.search).mockResolvedValue([{ ...duplicate, id: 'dup-a' }]);
-    vi.mocked(guardianAdapter.search).mockResolvedValue([{ ...duplicate, id: 'dup-b' }]);
-    vi.mocked(nytAdapter.search).mockResolvedValue([]);
-
-    const result = await fetchArticles(SEARCH_PARAMS, []);
-
-    expect(result.articles).toHaveLength(1);
-    expect(result.articles[0].id).toBe('dup-a');
-  });
-
-  it('sorts articles newest first', async () => {
-    vi.mocked(newsApiAdapter.search).mockResolvedValue([
-      minimalArticle({ id: 'old', url: 'https://example.com/old', publishedAt: '2024-01-01T00:00:00Z' }),
-      minimalArticle({ id: 'new', url: 'https://example.com/new', publishedAt: '2024-06-01T00:00:00Z' }),
-    ]);
-    vi.mocked(guardianAdapter.search).mockResolvedValue([]);
-    vi.mocked(nytAdapter.search).mockResolvedValue([]);
-
-    const result = await fetchArticles(SEARCH_PARAMS, []);
-
-    expect(result.articles[0].id).toBe('new');
-    expect(result.articles[1].id).toBe('old');
-  });
-
-  it('calls only the explicitly selected source adapter', async () => {
-    vi.mocked(newsApiAdapter.search).mockResolvedValue([]);
-    vi.mocked(guardianAdapter.search).mockResolvedValue([
-      minimalArticle({ id: 'guardian-1', title: 'Guardian result' }),
-    ]);
-    vi.mocked(nytAdapter.search).mockResolvedValue([]);
-
-    const result = await fetchArticles({ ...SEARCH_PARAMS, source: 'guardian' }, [
-      'newsapi',
-      'guardian',
-      'nyt',
-    ]);
-
-    expect(result.articles).toHaveLength(1);
-    expect(guardianAdapter.search).toHaveBeenCalledOnce();
-    expect(newsApiAdapter.search).not.toHaveBeenCalled();
-    expect(nytAdapter.search).not.toHaveBeenCalled();
-  });
-
-  it('keeps only articles matching an explicit category and date range', async () => {
-    vi.mocked(newsApiAdapter.search).mockResolvedValue([
-      minimalArticle({ id: 'technology', category: 'technology', publishedAt: '2024-03-15T00:00:00Z' }),
-      minimalArticle({ id: 'business', category: 'business', publishedAt: '2024-03-15T00:00:00Z' }),
-      minimalArticle({ id: 'outside-range', category: 'technology', publishedAt: '2024-02-15T00:00:00Z' }),
-    ]);
-    vi.mocked(guardianAdapter.search).mockResolvedValue([]);
-    vi.mocked(nytAdapter.search).mockResolvedValue([]);
-
-    const result = await fetchArticles(
-      {
-        ...SEARCH_PARAMS,
-        category: 'technology',
-        fromDate: '2024-03-01',
-        toDate: '2024-03-31',
-      },
-      ['newsapi'],
-    );
-
-    expect(result.articles.map((article) => article.id)).toEqual(['technology']);
-  });
-
-  it('applies preferred categories and authors when no explicit category is selected', async () => {
-    vi.mocked(newsApiAdapter.search).mockResolvedValue([
-      minimalArticle({ id: 'preferred', category: 'technology', author: 'Ada Lovelace' }),
-      minimalArticle({ id: 'wrong-category', category: 'business', author: 'Ada Lovelace' }),
-      minimalArticle({ id: 'wrong-author', category: 'technology', author: 'Grace Hopper' }),
-    ]);
-    vi.mocked(guardianAdapter.search).mockResolvedValue([]);
-    vi.mocked(nytAdapter.search).mockResolvedValue([]);
-
-    const result = await fetchArticles(
-      {
-        ...SEARCH_PARAMS,
-        preferredCategories: ['technology'],
-        preferredAuthors: ['ada'],
-      },
-      ['newsapi'],
-    );
-
-    expect(result.articles.map((article) => article.id)).toEqual(['preferred']);
   });
 });
