@@ -5,7 +5,7 @@ import { getItem, setItem } from '../lib/storage';
 const STORAGE_KEY = 'news_preferences';
 
 const createDefaultPreferences = (): UserPreferences => ({
-  sources: ['newsapi', 'guardian', 'nyt'],
+  sources: ['guardian', 'nyt'],
   categories: [],
   authors: [],
 });
