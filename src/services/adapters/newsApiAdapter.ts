@@ -2,6 +2,7 @@ import type { Article } from '../../types/article';
 import type { SearchParams } from '../../types/source';
 import type { NewsSource } from '../newsSource';
 import { cleanAuthor } from '../../lib/utils';
+import { appendParam, getRequiredApiKey } from '../api';
 
 interface NewsApiArticle {
   title: string | null;
@@ -25,10 +26,7 @@ interface NewsApiResponse {
 }
 
 const search = async (params: SearchParams): Promise<Article[]> => {
-  const apiKey = import.meta.env.VITE_NEWSAPI_KEY;
-  if (!apiKey) {
-    throw new Error('NewsAPI key is missing');
-  }
+  const apiKey = getRequiredApiKey('VITE_NEWSAPI_KEY', 'NewsAPI key is missing');
 
   if (params.category && (params.fromDate || params.toDate)) {
     throw new Error(
@@ -52,12 +50,12 @@ const search = async (params: SearchParams): Promise<Article[]> => {
   if (params.category) {
     url.searchParams.append('category', params.category);
   } else {
-    if (params.fromDate) {
-      url.searchParams.append('from', params.fromDate);
-    }
-    if (params.toDate) {
-      url.searchParams.append('to', params.toDate);
-    }
+  if (params.fromDate) {
+    appendParam(url, 'from', params.fromDate);
+  }
+  if (params.toDate) {
+    appendParam(url, 'to', params.toDate);
+  }
   }
 
   url.searchParams.append('apiKey', apiKey);

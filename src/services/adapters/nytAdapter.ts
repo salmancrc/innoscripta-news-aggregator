@@ -2,6 +2,7 @@ import type { Article } from '../../types/article';
 import type { Category, SearchParams } from '../../types/source';
 import type { NewsSource } from '../newsSource';
 import { cleanAuthor } from '../../lib/utils';
+import { appendParam, getRequiredApiKey, toNYTDate } from '../api';
 
 interface NYTMultimediaItem {
   subtype: string;
@@ -46,10 +47,6 @@ interface NYTResponse {
   };
 }
 
-const formatDate = (dateStr: string): string => {
-  return dateStr.split('T')[0].replace(/-/g, '');
-};
-
 const nytSectionsByCategory: Partial<Record<Category, string[]>> = {
   technology: ['Technology'],
   science: ['Science'],
@@ -88,10 +85,7 @@ const buildSectionFilter = (sections: string[]): string => {
 };
 
 const search = async (params: SearchParams): Promise<Article[]> => {
-  const apiKey = import.meta.env.VITE_NYT_KEY;
-  if (!apiKey) {
-    throw new Error('NYT API key is missing');
-  }
+  const apiKey = getRequiredApiKey('VITE_NYT_KEY', 'NYT API key is missing');
 
   const url = new URL('https://api.nytimes.com/svc/search/v2/articlesearch.json');
 
@@ -104,11 +98,11 @@ const search = async (params: SearchParams): Promise<Article[]> => {
   }
 
   if (params.fromDate) {
-    url.searchParams.append('begin_date', formatDate(params.fromDate));
+    appendParam(url, 'begin_date', toNYTDate(params.fromDate));
   }
 
   if (params.toDate) {
-    url.searchParams.append('end_date', formatDate(params.toDate));
+    appendParam(url, 'end_date', toNYTDate(params.toDate));
   }
 
   if (params.category) {

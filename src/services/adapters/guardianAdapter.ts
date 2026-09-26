@@ -2,6 +2,7 @@ import type { Article } from '../../types/article';
 import type { Category, SearchParams } from '../../types/source';
 import type { NewsSource } from '../newsSource';
 import { cleanAuthor } from '../../lib/utils';
+import { appendParam, getRequiredApiKey, toISODate } from '../api';
 
 interface GuardianArticle {
   id: string;
@@ -65,10 +66,7 @@ const guardianSectionByCategory: Partial<Record<Category, string>> = {
 };
 
 const search = async (params: SearchParams): Promise<Article[]> => {
-  const apiKey = import.meta.env.VITE_GUARDIAN_KEY;
-  if (!apiKey) {
-    throw new Error('Guardian API key is missing');
-  }
+  const apiKey = getRequiredApiKey('VITE_GUARDIAN_KEY', 'Guardian API key is missing');
 
   const url = new URL('https://content.guardianapis.com/search');
 
@@ -83,11 +81,11 @@ const search = async (params: SearchParams): Promise<Article[]> => {
   }
 
   if (params.fromDate) {
-    url.searchParams.append('from-date', params.fromDate.split('T')[0]);
+    appendParam(url, 'from-date', toISODate(params.fromDate));
   }
 
   if (params.toDate) {
-    url.searchParams.append('to-date', params.toDate.split('T')[0]);
+    appendParam(url, 'to-date', toISODate(params.toDate));
   }
 
   const section = params.category && guardianSectionByCategory[params.category];
