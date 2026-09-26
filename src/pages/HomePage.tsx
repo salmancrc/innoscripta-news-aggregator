@@ -1,168 +1,28 @@
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { useArticles } from "../hooks/useArticles";
-import { usePreferences } from "../hooks/usePreferences";
+import { useState } from "react";
 import SearchBar from "../features/search/SearchBar";
 import FilterPanel from "../features/search/FilterPanel";
 import ArticleFeed from "../features/feed/ArticleFeed";
 import ErrorBanner from "../components/ErrorBanner";
 import PreferencesDrawer from "../features/preferences/PreferencesDrawer";
-import { ALL_CATEGORIES, ALL_SOURCES, type SearchParams, type Category, type NewsSourceId } from "../types/source";
-
-interface FilterState {
-  keyword: string;
-  category: Category | null;
-  source: NewsSourceId | null;
-  fromDate: string | null;
-  toDate: string | null;
-}
-
-const isValidCategory = (value: string | null): value is Category =>
-  Boolean(value) && ALL_CATEGORIES.includes(value as Category);
-
-const isValidSource = (value: string | null): value is NewsSourceId =>
-  Boolean(value) && ALL_SOURCES.includes(value as NewsSourceId);
-
-const getInitialFilterState = (params: URLSearchParams): FilterState => ({
-  keyword: params.get("q") ?? "",
-  category: isValidCategory(params.get("category")) ? (params.get("category") as Category) : null,
-  source: isValidSource(params.get("source")) ? (params.get("source") as NewsSourceId) : null,
-  fromDate: params.get("from") ?? null,
-  toDate: params.get("to") ?? null,
-});
-
-const buildSearchParams = ({ keyword, category, source, fromDate, toDate }: FilterState) => {
-  const next = new URLSearchParams();
-
-  const entries: Array<[string, string]> = [
-    ["q", keyword.trim()],
-    ["category", category ?? ""],
-    ["source", source ?? ""],
-    ["from", fromDate ?? ""],
-    ["to", toDate ?? ""],
-  ];
-
-  entries.forEach(([key, value]) => {
-    if (value) next.set(key, value);
-  });
-
-  return next;
-};
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [value, delay]);
-
-  return debouncedValue;
-}
+import { useArticles } from "../hooks/useArticles";
+import { usePreferences } from "../hooks/usePreferences";
+import { useFilters } from "../hooks/useFilters";
+import { useTheme } from "../hooks/useTheme";
 
 const HomePage = () => {
-  const [urlSearchParams, setUrlSearchParams] = useSearchParams();
-  const [filters, setFilters] = useState<FilterState>(() => getInitialFilterState(urlSearchParams));
-  const [isPreferencesOpen, setIsPreferencesOpen] = useState<boolean>(false);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    if (typeof document === 'undefined') return false;
-    return document.documentElement.classList.contains('dark');
-  });
-
-  const { keyword, category, source, fromDate, toDate } = filters;
-  const debouncedKeyword = useDebounce(keyword, 500);
   const { preferences, updatePreferences, resetPreferences } = usePreferences();
+  const { isDarkMode, toggleTheme } = useTheme();
+  const [isPreferencesOpen, setIsPreferencesOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    const next = buildSearchParams({
-      ...filters,
-      keyword: debouncedKeyword,
-    });
-
-    const current = urlSearchParams.toString();
-    const nextString = next.toString();
-    if (current !== nextString) {
-      setUrlSearchParams(next, { replace: true });
-    }
-  }, [debouncedKeyword, filters, urlSearchParams, setUrlSearchParams]);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const onMediaChange = () => {
-      const savedTheme = localStorage.getItem('theme');
-      if (!savedTheme) {
-        const nextDarkMode = mediaQuery.matches;
-        document.documentElement.classList.toggle('dark', nextDarkMode);
-        document.documentElement.style.colorScheme = nextDarkMode ? 'dark' : 'light';
-        setIsDarkMode(nextDarkMode);
-      }
-    };
-
-    mediaQuery.addEventListener('change', onMediaChange);
-    return () => mediaQuery.removeEventListener('change', onMediaChange);
-  }, []);
-
-  const toggleTheme = () => {
-    const root = document.documentElement;
-    const nextDarkMode = !root.classList.contains('dark');
-
-    root.classList.add('theme-transition-off');
-    root.classList.toggle('dark', nextDarkMode);
-    root.style.colorScheme = nextDarkMode ? 'dark' : 'light';
-    localStorage.setItem('theme', nextDarkMode ? 'dark' : 'light');
-    setIsDarkMode(nextDarkMode);
-
-    window.setTimeout(() => {
-      root.classList.remove('theme-transition-off');
-    }, 120);
-  };
-
-  const effectiveCategory = useMemo(
-    () => category ?? (preferences.categories.length === 1 ? preferences.categories[0] : null),
-    [category, preferences.categories],
+  const { keyword, category, source, fromDate, toDate, requestParams, updateFilter } = useFilters(
+    preferences.categories,
+    preferences.authors,
   );
-
-  const requestParams = useMemo<SearchParams>(() => ({
-    keyword: debouncedKeyword,
-    category: effectiveCategory,
-    source,
-    fromDate,
-    toDate,
-    preferredCategories: preferences.categories,
-    preferredAuthors: preferences.authors,
-  }), [debouncedKeyword, effectiveCategory, source, fromDate, toDate, preferences.categories, preferences.authors]);
 
   const { articles, sourceErrors, isLoading } = useArticles(
     requestParams,
     preferences.sources,
   );
-
-  const handleFilterChange = (patch: Partial<FilterState>) => {
-    setFilters((current) => ({ ...current, ...patch }));
-  };
-
-  const handleKeywordChange = (value: string) => {
-    handleFilterChange({ keyword: value });
-  };
-
-  const handleCategoryChange = (value: Category | null) => {
-    handleFilterChange({ category: value });
-  };
-
-  const handleSourceChange = (value: NewsSourceId | null) => {
-    handleFilterChange({ source: value });
-  };
-
-  const handleFromDateChange = (value: string | null) => {
-    handleFilterChange({ fromDate: value });
-  };
-
-  const handleToDateChange = (value: string | null) => {
-    handleFilterChange({ toDate: value });
-  };
 
   const handleOpenPreferences = () => setIsPreferencesOpen(true);
   const handleClosePreferences = () => setIsPreferencesOpen(false);
@@ -243,17 +103,17 @@ const HomePage = () => {
           onReset={resetPreferences}
         />
 
-        <SearchBar value={keyword} onChange={handleKeywordChange} />
+        <SearchBar value={keyword} onChange={(value) => updateFilter({ keyword: value })} />
 
         <FilterPanel
           selectedCategory={category}
           selectedSource={source}
           fromDate={fromDate}
           toDate={toDate}
-          onCategoryChange={handleCategoryChange}
-          onSourceChange={handleSourceChange}
-          onFromDateChange={handleFromDateChange}
-          onToDateChange={handleToDateChange}
+          onCategoryChange={(value) => updateFilter({ category: value })}
+          onSourceChange={(value) => updateFilter({ source: value })}
+          onFromDateChange={(value) => updateFilter({ fromDate: value })}
+          onToDateChange={(value) => updateFilter({ toDate: value })}
         />
 
         <ErrorBanner errors={sourceErrors} />
