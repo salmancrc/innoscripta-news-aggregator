@@ -60,16 +60,26 @@ const nytSectionsByCategory: Partial<Record<Category, string[]>> = {
   general: ['U.S.', 'World', 'Politics'],
 };
 
+const NYT_CATEGORY_MAP: Record<string, Category> = {
+  technology: 'technology',
+  science: 'science',
+  health: 'health',
+  business: 'business',
+  sports: 'sports',
+  sport: 'sports',
+  arts: 'entertainment',
+  movies: 'entertainment',
+  theater: 'entertainment',
+  books: 'entertainment',
+  'u.s.': 'general',
+  us: 'general',
+  world: 'general',
+  politics: 'general',
+};
+
 const mapNytCategory = (sectionName: string): Category | null => {
   const section = sectionName.trim().toLowerCase();
-  if (section === 'technology') return 'technology';
-  if (section === 'science') return 'science';
-  if (section === 'health') return 'health';
-  if (section === 'business') return 'business';
-  if (section === 'sports' || section === 'sport') return 'sports';
-  if (['arts', 'movies', 'theater', 'books'].includes(section)) return 'entertainment';
-  if (['u.s.', 'us', 'world', 'politics'].includes(section)) return 'general';
-  return null;
+  return NYT_CATEGORY_MAP[section] ?? null;
 };
 
 const buildSectionFilter = (sections: string[]): string => {

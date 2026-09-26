@@ -4,15 +4,15 @@ import { getItem, setItem } from '../lib/storage';
 
 const STORAGE_KEY = 'news_preferences';
 
-const DEFAULT_PREFERENCES: UserPreferences = {
+const createDefaultPreferences = (): UserPreferences => ({
   sources: ['newsapi', 'guardian', 'nyt'],
   categories: [],
   authors: [],
-};
+});
 
 export function usePreferences() {
   const [preferences, setPreferencesState] = useState<UserPreferences>(() =>
-    getItem<UserPreferences>(STORAGE_KEY, DEFAULT_PREFERENCES)
+    getItem<UserPreferences>(STORAGE_KEY, createDefaultPreferences())
   );
 
   const updatePreferences = useCallback((partial: Partial<UserPreferences>) => {
@@ -24,8 +24,9 @@ export function usePreferences() {
   }, []);
 
   const resetPreferences = useCallback(() => {
-    setPreferencesState(DEFAULT_PREFERENCES);
-    setItem(STORAGE_KEY, DEFAULT_PREFERENCES);
+    const next = createDefaultPreferences();
+    setPreferencesState(next);
+    setItem(STORAGE_KEY, next);
   }, []);
 
   return { preferences, updatePreferences, resetPreferences };

@@ -1,6 +1,13 @@
 import { ConfigProvider, DatePicker, theme } from 'antd';
 import dayjs from 'dayjs';
-import type { Category, NewsSourceId } from '../../types/source';
+import {
+  ALL_CATEGORIES,
+  ALL_SOURCES,
+  getCategoryLabel,
+  getSourceLabel,
+  type Category,
+  type NewsSourceId,
+} from '../../types/source';
 
 const { darkAlgorithm, defaultAlgorithm } = theme;
 
@@ -17,17 +24,8 @@ export interface FilterPanelProps {
   onToDateChange: (v: string | null) => void;
 }
 
-const CATEGORIES: Category[] = [
-  'general',
-  'technology',
-  'science',
-  'health',
-  'business',
-  'sports',
-  'entertainment',
-];
-
-const SOURCES: NewsSourceId[] = ['newsapi', 'guardian', 'nyt'];
+const CATEGORIES = ALL_CATEGORIES;
+const SOURCES = ALL_SOURCES;
 
 export const FilterPanel = ({
   selectedCategory,
@@ -80,7 +78,7 @@ export const FilterPanel = ({
                     : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600'
                 }`}
               >
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {getCategoryLabel(cat)}
               </button>
             ))}
           </div>
@@ -93,7 +91,7 @@ export const FilterPanel = ({
             <option value="">All categories</option>
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {getCategoryLabel(cat)}
               </option>
             ))}
           </select>
@@ -128,7 +126,7 @@ export const FilterPanel = ({
                     : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600'
                 }`}
               >
-                {src === 'newsapi' ? 'NewsAPI' : src === 'guardian' ? 'The Guardian' : 'NYT'}
+                {getSourceLabel(src)}
               </button>
             ))}
           </div>
@@ -141,7 +139,7 @@ export const FilterPanel = ({
             <option value="">All sources</option>
             {SOURCES.map((src) => (
               <option key={src} value={src}>
-                {src === 'newsapi' ? 'NewsAPI' : src === 'guardian' ? 'The Guardian' : 'New York Times'}
+                {getSourceLabel(src)}
               </option>
             ))}
           </select>

@@ -12,6 +12,6 @@ export function setItem<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Silently ignore errors
+    // ignore storage write failures
   }
 }

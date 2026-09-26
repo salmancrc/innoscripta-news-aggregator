@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { UserPreferences, NewsSourceId, Category } from '../../types/source';
+import { CATEGORY_OPTIONS, SOURCE_OPTIONS } from '../../types/source';
 
 export interface PreferencesPanelProps {
   preferences: UserPreferences;
@@ -7,21 +8,8 @@ export interface PreferencesPanelProps {
   onReset: () => void;
 }
 
-const SOURCES: { id: NewsSourceId; label: string }[] = [
-  { id: 'newsapi', label: 'NewsAPI' },
-  { id: 'guardian', label: 'The Guardian' },
-  { id: 'nyt', label: 'New York Times' },
-];
-
-const CATEGORIES: { id: Category; label: string }[] = [
-  { id: 'general', label: 'General' },
-  { id: 'technology', label: 'Technology' },
-  { id: 'science', label: 'Science' },
-  { id: 'health', label: 'Health' },
-  { id: 'business', label: 'Business' },
-  { id: 'sports', label: 'Sports' },
-  { id: 'entertainment', label: 'Entertainment' },
-];
+const SOURCES = SOURCE_OPTIONS;
+const CATEGORIES = CATEGORY_OPTIONS;
 
 export const PreferencesPanel = ({
   preferences,

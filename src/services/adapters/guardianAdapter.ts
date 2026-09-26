@@ -26,32 +26,33 @@ interface GuardianResponse {
   };
 }
 
+const CATEGORY_MATCHERS: Array<{ category: Category; keywords: string[] }> = [
+  { category: 'technology', keywords: ['tech'] },
+  { category: 'science', keywords: ['science'] },
+  {
+    category: 'health',
+    keywords: ['health', 'medical', 'life and style', 'lifeandstyle', 'lifestyle'],
+  },
+  { category: 'business', keywords: ['business', 'money', 'economy'] },
+  { category: 'sports', keywords: ['sport'] },
+  {
+    category: 'entertainment',
+    keywords: ['entertainment', 'film', 'music', 'culture', 'arts'],
+  },
+  {
+    category: 'general',
+    keywords: ['news', 'world', 'uk', 'global', 'politic'],
+  },
+];
+
 const mapCategory = (sectionName: string): Category | null => {
   const lower = sectionName.trim().toLowerCase();
-  if (lower.includes('tech')) return 'technology';
-  if (lower.includes('science')) return 'science';
-  if (
-    lower.includes('health') ||
-    lower.includes('medical') ||
-    lower.includes('life and style') ||
-    lower.includes('lifeandstyle') ||
-    lower.includes('lifestyle')
-  ) {
-    return 'health';
-  }
-  if (lower.includes('business') || lower.includes('money') || lower.includes('economy')) return 'business';
-  if (lower.includes('sport')) return 'sports';
-  if (
-    lower.includes('entertainment') ||
-    lower.includes('film') ||
-    lower.includes('music') ||
-    lower.includes('culture') ||
-    lower.includes('arts')
-  ) {
-    return 'entertainment';
-  }
-  if (lower.includes('news') || lower.includes('world') || lower.includes('uk') || lower.includes('global') || lower.includes('politic')) return 'general';
-  return null;
+
+  const matchedCategory = CATEGORY_MATCHERS.find(({ keywords }) =>
+    keywords.some((keyword) => lower.includes(keyword)),
+  );
+
+  return matchedCategory?.category ?? null;
 };
 
 const guardianSectionByCategory: Partial<Record<Category, string>> = {

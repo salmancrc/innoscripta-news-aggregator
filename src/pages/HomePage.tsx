@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useArticles } from "../hooks/useArticles";
 import { usePreferences } from "../hooks/usePreferences";
@@ -7,7 +7,47 @@ import FilterPanel from "../features/search/FilterPanel";
 import ArticleFeed from "../features/feed/ArticleFeed";
 import ErrorBanner from "../components/ErrorBanner";
 import PreferencesDrawer from "../features/preferences/PreferencesDrawer";
-import type { SearchParams, Category, NewsSourceId } from "../types/source";
+import { ALL_CATEGORIES, ALL_SOURCES, type SearchParams, type Category, type NewsSourceId } from "../types/source";
+
+interface FilterState {
+  keyword: string;
+  category: Category | null;
+  source: NewsSourceId | null;
+  fromDate: string | null;
+  toDate: string | null;
+}
+
+const isValidCategory = (value: string | null): value is Category =>
+  Boolean(value) && ALL_CATEGORIES.includes(value as Category);
+
+const isValidSource = (value: string | null): value is NewsSourceId =>
+  Boolean(value) && ALL_SOURCES.includes(value as NewsSourceId);
+
+const getInitialFilterState = (params: URLSearchParams): FilterState => ({
+  keyword: params.get("q") ?? "",
+  category: isValidCategory(params.get("category")) ? (params.get("category") as Category) : null,
+  source: isValidSource(params.get("source")) ? (params.get("source") as NewsSourceId) : null,
+  fromDate: params.get("from") ?? null,
+  toDate: params.get("to") ?? null,
+});
+
+const buildSearchParams = ({ keyword, category, source, fromDate, toDate }: FilterState) => {
+  const next = new URLSearchParams();
+
+  const entries: Array<[string, string]> = [
+    ["q", keyword.trim()],
+    ["category", category ?? ""],
+    ["source", source ?? ""],
+    ["from", fromDate ?? ""],
+    ["to", toDate ?? ""],
+  ];
+
+  entries.forEach(([key, value]) => {
+    if (value) next.set(key, value);
+  });
+
+  return next;
+};
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -25,43 +65,29 @@ function useDebounce<T>(value: T, delay: number): T {
 
 const HomePage = () => {
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
-  const [keyword, setKeyword] = useState<string>(() => urlSearchParams.get("q") ?? "");
-  const [category, setCategory] = useState<SearchParams["category"]>(() => {
-    const value = urlSearchParams.get("category");
-    return value && ["general", "technology", "science", "health", "business", "sports", "entertainment"].includes(value)
-      ? (value as Category)
-      : null;
-  });
-  const [source, setSource] = useState<SearchParams["source"]>(() => {
-    const value = urlSearchParams.get("source");
-    return value === "newsapi" || value === "guardian" || value === "nyt" ? (value as NewsSourceId) : null;
-  });
-  const [fromDate, setFromDate] = useState<string | null>(() => urlSearchParams.get("from") ?? null);
-  const [toDate, setToDate] = useState<string | null>(() => urlSearchParams.get("to") ?? null);
+  const [filters, setFilters] = useState<FilterState>(() => getInitialFilterState(urlSearchParams));
   const [isPreferencesOpen, setIsPreferencesOpen] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     if (typeof document === 'undefined') return false;
     return document.documentElement.classList.contains('dark');
   });
 
+  const { keyword, category, source, fromDate, toDate } = filters;
   const debouncedKeyword = useDebounce(keyword, 500);
   const { preferences, updatePreferences, resetPreferences } = usePreferences();
 
   useEffect(() => {
-    const next = new URLSearchParams();
-
-    if (debouncedKeyword.trim()) next.set('q', debouncedKeyword.trim());
-    if (category) next.set('category', category);
-    if (source) next.set('source', source);
-    if (fromDate) next.set('from', fromDate);
-    if (toDate) next.set('to', toDate);
+    const next = buildSearchParams({
+      ...filters,
+      keyword: debouncedKeyword,
+    });
 
     const current = urlSearchParams.toString();
     const nextString = next.toString();
     if (current !== nextString) {
       setUrlSearchParams(next, { replace: true });
     }
-  }, [debouncedKeyword, category, source, fromDate, toDate, urlSearchParams, setUrlSearchParams]);
+  }, [debouncedKeyword, filters, urlSearchParams, setUrlSearchParams]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -94,9 +120,12 @@ const HomePage = () => {
     }, 120);
   };
 
-  const effectiveCategory = category ?? (preferences.categories.length === 1 ? preferences.categories[0] : null);
+  const effectiveCategory = useMemo(
+    () => category ?? (preferences.categories.length === 1 ? preferences.categories[0] : null),
+    [category, preferences.categories],
+  );
 
-  const requestParams: SearchParams = {
+  const requestParams = useMemo<SearchParams>(() => ({
     keyword: debouncedKeyword,
     category: effectiveCategory,
     source,
@@ -104,16 +133,39 @@ const HomePage = () => {
     toDate,
     preferredCategories: preferences.categories,
     preferredAuthors: preferences.authors,
-  };
+  }), [debouncedKeyword, effectiveCategory, source, fromDate, toDate, preferences.categories, preferences.authors]);
 
   const { articles, sourceErrors, isLoading } = useArticles(
     requestParams,
     preferences.sources,
   );
 
-  const handleKeywordChange = useCallback((value: string) => {
-    setKeyword(value);
-  }, []);
+  const handleFilterChange = (patch: Partial<FilterState>) => {
+    setFilters((current) => ({ ...current, ...patch }));
+  };
+
+  const handleKeywordChange = (value: string) => {
+    handleFilterChange({ keyword: value });
+  };
+
+  const handleCategoryChange = (value: Category | null) => {
+    handleFilterChange({ category: value });
+  };
+
+  const handleSourceChange = (value: NewsSourceId | null) => {
+    handleFilterChange({ source: value });
+  };
+
+  const handleFromDateChange = (value: string | null) => {
+    handleFilterChange({ fromDate: value });
+  };
+
+  const handleToDateChange = (value: string | null) => {
+    handleFilterChange({ toDate: value });
+  };
+
+  const handleOpenPreferences = () => setIsPreferencesOpen(true);
+  const handleClosePreferences = () => setIsPreferencesOpen(false);
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-900 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8">
@@ -153,7 +205,7 @@ const HomePage = () => {
           <div className="flex items-center gap-2 self-center">
             <button
               type="button"
-              onClick={() => setIsPreferencesOpen(true)}
+              onClick={handleOpenPreferences}
               className="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold text-indigo-600 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:text-indigo-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300 dark:focus-visible:ring-offset-slate-900"
             >
               Preferences
@@ -185,7 +237,7 @@ const HomePage = () => {
 
         <PreferencesDrawer
           isOpen={isPreferencesOpen}
-          onClose={() => setIsPreferencesOpen(false)}
+          onClose={handleClosePreferences}
           preferences={preferences}
           onUpdate={updatePreferences}
           onReset={resetPreferences}
@@ -198,10 +250,10 @@ const HomePage = () => {
           selectedSource={source}
           fromDate={fromDate}
           toDate={toDate}
-          onCategoryChange={setCategory}
-          onSourceChange={setSource}
-          onFromDateChange={setFromDate}
-          onToDateChange={setToDate}
+          onCategoryChange={handleCategoryChange}
+          onSourceChange={handleSourceChange}
+          onFromDateChange={handleFromDateChange}
+          onToDateChange={handleToDateChange}
         />
 
         <ErrorBanner errors={sourceErrors} />
