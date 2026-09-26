@@ -11,14 +11,14 @@ const PreferencesPage = () => {
         <div className="mb-6 flex items-center gap-4">
           <Link
             to="/"
-            className="flex items-center gap-1.5 text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            className="flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
           >
             <span aria-hidden="true">←</span>
             Back to feed
           </Link>
         </div>
 
-        <h1 className="mb-8 text-3xl font-bold tracking-tight">Your Preferences</h1>
+        <h1 className="mb-8 text-3xl font-bold tracking-[-0.03em]">Your Preferences</h1>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-8">
           <PreferencesPanel
