@@ -116,7 +116,7 @@ export const PreferencesPanel = ({
                 type="checkbox"
                 checked={preferences.categories.includes(id)}
                 onChange={(e) => handleCategoryChange(id, e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600"
+                className="h-4 w-4 min-h-4 min-w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600"
               />
               <label
                 htmlFor={`category-${id}`}
@@ -151,7 +151,8 @@ export const PreferencesPanel = ({
           <button
             type="submit"
             disabled={!authorInput.trim()}
-            className="cursor-pointer rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:text-white disabled:opacity-50 disabled:cursor-not-allowed dark:bg-indigo-500 dark:text-white dark:hover:bg-indigo-400"
+            className="cursor-pointer rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+            style={{ color: '#ffffff' }}
           >
             Add
           </button>
@@ -185,7 +186,7 @@ export const PreferencesPanel = ({
         <button
           type="button"
           onClick={onReset}
-          className="cursor-pointer rounded-xl border border-red-300 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-all duration-200 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:border-red-700 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/30 dark:focus:ring-offset-slate-900"
+          className="inline-flex w-full cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:focus:ring-offset-slate-900"
         >
           Reset to defaults
         </button>
