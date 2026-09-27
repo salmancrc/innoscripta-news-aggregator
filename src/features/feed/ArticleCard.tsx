@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Article } from '../../types/article';
-import { capitalizeCategory } from '../../lib/utils';
+import { capitalizeCategory, stripTags } from '../../lib/utils';
 
 export interface ArticleCardProps {
   article: Article;
@@ -58,7 +58,7 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
 
           {article.description && (
             <p className="line-clamp-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              {article.description}
+              {stripTags(article.description)}
             </p>
           )}
 

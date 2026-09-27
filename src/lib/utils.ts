@@ -16,3 +16,7 @@ export function capitalizeCategory(category: string | null): string | null {
   if (!category) return null;
   return category.charAt(0).toUpperCase() + category.slice(1);
 }
+
+export function stripTags(text: string): string {
+  return text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+}

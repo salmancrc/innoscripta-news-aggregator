@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ConfigProvider, DatePicker, theme } from 'antd';
 import dayjs from 'dayjs';
 import {
@@ -37,7 +38,17 @@ export const FilterPanel = ({
   onFromDateChange,
   onToDateChange,
 }: FilterPanelProps) => {
-  const isDarkMode = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  const isDarkMode =
+    typeof document !== "undefined" &&
+    document.documentElement.classList.contains("dark");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleClear = () => {
     onCategoryChange(null);
@@ -183,30 +194,56 @@ export const FilterPanel = ({
                   },
             }}
           >
-            <RangePicker
-              className="project-range-picker w-full rounded-[10px] shadow-none min-h-[42px] h-[42px] bg-white dark:bg-slate-700"
-              value={
-                fromDate && toDate
-                  ? [dayjs(fromDate), dayjs(toDate)]
-                  : fromDate
-                    ? [dayjs(fromDate), dayjs(fromDate)]
-                    : toDate
-                      ? [dayjs(toDate), dayjs(toDate)]
-                      : undefined
-              }
-              format="YYYY/MM/DD"
-              onChange={(dates) => {
-                if (!dates || dates[0] == null || dates[1] == null) {
-                  onFromDateChange(null);
-                  onToDateChange(null);
-                  return;
+            {isMobile ? (
+              <div className="grid grid-cols-2 gap-2">
+                <DatePicker
+                  className="w-full rounded-[10px] shadow-none min-h-[42px] h-[42px] bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-sm px-3"
+                  placeholder="From"
+                  value={fromDate ? dayjs(fromDate) : null}
+                  format="YYYY/MM/DD"
+                  onChange={(date) =>
+                    onFromDateChange(date ? date.format("YYYY-MM-DD") : null)
+                  }
+                  getPopupContainer={() => document.body}
+                />
+                <DatePicker
+                  className="w-full rounded-[10px] shadow-none min-h-[42px] h-[42px] bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-sm px-3"
+                  placeholder="To"
+                  value={toDate ? dayjs(toDate) : null}
+                  format="YYYY/MM/DD"
+                  onChange={(date) =>
+                    onToDateChange(date ? date.format("YYYY-MM-DD") : null)
+                  }
+                  getPopupContainer={() => document.body}
+                />
+              </div>
+            ) : (
+              <RangePicker
+                className="project-range-picker w-full rounded-[10px] shadow-none min-h-[42px] h-[42px] bg-white dark:bg-slate-700"
+                getPopupContainer={() => document.body}
+                value={
+                  fromDate && toDate
+                    ? [dayjs(fromDate), dayjs(toDate)]
+                    : fromDate
+                      ? [dayjs(fromDate), dayjs(fromDate)]
+                      : toDate
+                        ? [dayjs(toDate), dayjs(toDate)]
+                        : undefined
                 }
+                format="YYYY/MM/DD"
+                onChange={(dates) => {
+                  if (!dates || dates[0] == null || dates[1] == null) {
+                    onFromDateChange(null);
+                    onToDateChange(null);
+                    return;
+                  }
 
-                const [start, end] = dates;
-                onFromDateChange(start ? start.format('YYYY-MM-DD') : null);
-                onToDateChange(end ? end.format('YYYY-MM-DD') : null);
-              }}
-            />
+                  const [start, end] = dates;
+                  onFromDateChange(start ? start.format("YYYY-MM-DD") : null);
+                  onToDateChange(end ? end.format("YYYY-MM-DD") : null);
+                }}
+              />
+            )}
           </ConfigProvider>
         </div>
       </div>
